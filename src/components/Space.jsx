@@ -5,7 +5,7 @@ function Space({ started, stop }) {
   let [cages, setCages] = useState([]);
   const [rows, setRows] = useState([]);
   const [columns, setColumns] = useState([]);
-  let interval = null;
+  let [interval, setIntervalState] = useState(null);
 
   const passiveData = {
     rows: 30,
@@ -126,11 +126,14 @@ function Space({ started, stop }) {
   };
 
   useEffect(() => {
-    if (started)
-      interval = setInterval(() => {
+    if (started) {
+      setIntervalState(setInterval(() => {
         tick();
-      }, passiveData.intervalDelay);
-  }, [started, passiveData.intervalDelay, interval]);
+      }, passiveData.intervalDelay))
+    } else {
+      clearInterval(interval)
+    }
+  }, [started]);
 
   const lifeWrapperClasses = useMemo(
     () => (started ? "life-wrapper" : "life-wrapper pointer"),
