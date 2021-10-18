@@ -3,8 +3,8 @@ import Cage from "./Cage.jsx";
 
 function Space({ started, stop }) {
   let [cages, setCages] = useState([]);
-  const rows = [];
-  const columns = [];
+  const [rows, setRows] = useState([]);
+  const [columns, setColumns] = useState([]);
   let interval = null;
 
   const passiveData = {
@@ -12,19 +12,69 @@ function Space({ started, stop }) {
     columns: 30,
     intervalDelay: 100,
   };
-  for (let i = 0; i < passiveData.rows; i++) {
-    rows.push(i);
-  }
-  for (let i = 0; i < passiveData.columns; i++) {
-    columns.push(i);
-  }
-  if (!cages.length) {
+  useEffect(() => {
+    const r = [];
+    const c = [];
+    const newCages = [];
+    for (let i = 0; i < passiveData.rows; i++) {
+      r.push(i);
+    }
+    for (let i = 0; i < passiveData.columns; i++) {
+      c.push(i);
+    }
+    setRows(r);
+    setColumns(c);
     for (let i = 1; i <= passiveData.rows; i++) {
       for (let i1 = 1; i1 <= passiveData.columns; i1++) {
-        cages.push({ row: i, col: i1, alive: false, willLive: false });
+        newCages.push({ row: i, col: i1, alive: false, willLive: false });
       }
     }
-  }
+    function countCagesDependency(arr) {
+      arr.forEach((cage) => {
+        const rowIndex = cage.row - 1;
+        const colIndex = cage.col - 1;
+        let leftTop =
+          colIndex != 0 ? passiveData.rows * (rowIndex - 1) + colIndex - 1 : -1;
+        let top = passiveData.rows * (rowIndex - 1) + colIndex;
+        let rightTop =
+          colIndex != passiveData.columns - 1
+            ? passiveData.rows * (rowIndex - 1) + colIndex + 1
+            : -1;
+        let left = colIndex != 0 ? passiveData.rows * rowIndex + colIndex - 1 : -1;
+        let right =
+          colIndex != passiveData.columns - 1
+            ? passiveData.rows * rowIndex + colIndex + 1
+            : -1;
+        let leftBottom =
+          colIndex != 0 ? passiveData.rows * (rowIndex + 1) + colIndex - 1 : -1;
+        let bottom = passiveData.rows * (rowIndex + 1) + colIndex;
+        let rightBottom =
+          colIndex != passiveData.columns - 1
+            ? passiveData.rows * (rowIndex + 1) + colIndex + 1
+            : -1;
+        const aroundCages = [
+          leftTop,
+          top,
+          rightTop,
+          left,
+          right,
+          leftBottom,
+          bottom,
+          rightBottom,
+        ];
+        const around = [];
+        aroundCages.forEach((item) => {
+          if (item >= 0 && item <= arr.length - 1) around.push(item);
+        });
+        cage.around = around;
+      });
+    }
+    countCagesDependency(newCages)
+    setCages(newCages);
+  }, []);
+  
+  
+  
 
   const update = () => {
     setCages(
@@ -52,6 +102,7 @@ function Space({ started, stop }) {
     setCages(
       cages.map((item, index1) => {
         if (index1 === index) {
+          console.log(item);
           item.alive = true;
         }
         return item;
@@ -73,39 +124,12 @@ function Space({ started, stop }) {
     if (!aliveCages) stop();
     update();
   };
-  cages.forEach((cage) => {
-    const rowIndex = cage.row - 1
-    const colIndex = cage.col - 1
-    
-    let leftTop = rows.length * (rowIndex - 1) + colIndex - 1;
-    let top = rows.length * (rowIndex - 1) + colIndex
-    let rightTop = rows.length * (rowIndex - 1) + colIndex + 1
-    let left = (colIndex != 0) ? (rows.length * rowIndex + colIndex - 1) : -1;
-    let right = (colIndex != columns.length - 1) ? (rows.length * rowIndex + colIndex + 1) : -1;
-    let leftBottom = rows.length * (rowIndex + 1) + colIndex - 1;
-    let bottom = rows.length * (rowIndex + 1) + colIndex;
-    let rightBottom = rows.length * (rowIndex + 1) + colIndex + 1;
-    const aroundCages = [
-      leftTop,
-      top,
-      rightTop,
-      left,
-      right,
-      leftBottom,
-      bottom,
-      rightBottom,
-    ];
-    const around = [];
-    aroundCages.forEach((item) => {
-      if (item >= 0 && item <= cages.length - 1) around.push(item);
-    });
-    cage.around = around;
-  });
 
   useEffect(() => {
-    if(started) interval = setInterval(() => {
-      tick();
-    }, passiveData.intervalDelay);
+    if (started)
+      interval = setInterval(() => {
+        tick();
+      }, passiveData.intervalDelay);
   }, [started, passiveData.intervalDelay, interval]);
 
   const lifeWrapperClasses = useMemo(
