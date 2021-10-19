@@ -8,26 +8,25 @@ function generateCages(rows, columns) {
   newCages.forEach((cage) => {
     const rowIndex = cage.row - 1;
     const colIndex = cage.col - 1;
-    let leftTop =
-      colIndex != 0 ? rows * (rowIndex - 1) + colIndex - 1 : -1;
-    let top = rows * (rowIndex - 1) + colIndex;
-    let rightTop =
-      colIndex != columns - 1
-        ? rows * (rowIndex - 1) + colIndex + 1
-        : -1;
-    let left =
-      colIndex != 0 ? rows * rowIndex + colIndex - 1 : -1;
-    let right =
-      colIndex != columns - 1
-        ? rows * rowIndex + colIndex + 1
-        : -1;
-    let leftBottom =
-      colIndex != 0 ? rows * (rowIndex + 1) + colIndex - 1 : -1;
-    let bottom = rows * (rowIndex + 1) + colIndex;
-    let rightBottom =
-      colIndex != columns - 1
-        ? rows * (rowIndex + 1) + colIndex + 1
-        : -1;
+    let topRow = rowIndex
+      ? rows * (rowIndex - 1)
+      : rows * (rows - 1);
+    let centerRow = rows * rowIndex;
+    let bottomRow =
+      rowIndex !== rows - 1 ? rows * (rowIndex + 1) : 0;
+    let leftColumn = colIndex ? colIndex - 1 : columns - 1;
+    let centerColumn = colIndex;
+    let rightColumn = colIndex !== columns - 1 ? colIndex + 1 : 0;
+
+    let leftTop = topRow + leftColumn;
+    let top = topRow + centerColumn;
+    let rightTop = topRow + rightColumn;
+    let left = centerRow + leftColumn;
+    let right = centerRow + rightColumn;
+    let leftBottom = bottomRow + leftColumn;
+    let bottom = bottomRow + centerColumn;
+    let rightBottom = bottomRow + rightColumn;
+
     const aroundCages = [
       leftTop,
       top,
@@ -38,11 +37,7 @@ function generateCages(rows, columns) {
       bottom,
       rightBottom,
     ];
-    const around = [];
-    aroundCages.forEach((item) => {
-      if (item >= 0 && item <= newCages.length - 1) around.push(item);
-    });
-    cage.around = around;
+    cage.around = aroundCages;
   });
   return newCages
 }

@@ -25,7 +25,7 @@ function Space({ started, stop }) {
   const update = () => {
     setCages(updateCages(cages));
   };
-  
+
   const selectItem = (index) => {
     setCages(
       cages.map((item, index1) => {
@@ -37,7 +37,7 @@ function Space({ started, stop }) {
     );
     update();
   };
-  
+
   const tick = () => {
     let aliveCages = 0;
     setCages(
